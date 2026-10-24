@@ -11,7 +11,7 @@ class DeewanApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'دیوانِ سخن',
       theme: ThemeData.dark(useMaterial3: true),
-      home: const Directionality(
+      home:  Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
           appBar: AppBar(title: Text('دیوانِ سخن')),
