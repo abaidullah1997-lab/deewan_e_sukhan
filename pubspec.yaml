@@ -12,7 +12,12 @@ dependencies:
   shared_preferences: ^2.3.2
   file_picker: ^8.1.7
   share_plus: ^10.1.4
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
-  
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "AISelect_20261020_171534_Gallery.jpg"
