@@ -1,4 +1,4 @@
-import 'dart:convert';
+deimport 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -126,7 +126,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   }
 
   void _message(String message) {
-    if (!mounted) return false;
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
