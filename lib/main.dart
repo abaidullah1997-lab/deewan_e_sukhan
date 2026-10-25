@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -90,6 +94,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   bool _loading = true;
   String? _loadError;
   int _tab = 0;
+  bool _backupBusy = false;
 
   @override
   void initState() {
@@ -178,6 +183,119 @@ class _DeewanHomeState extends State<DeewanHome> {
       _message('غزل حذف کر دی گئی');
     } else {
       _message('حذف کرنے میں مسئلہ آیا');
+    }
+  }
+
+  Future<void> _exportBackup() async {
+    if (_backupBusy) return;
+    setState(() => _backupBusy = true);
+    File? temporaryFile;
+    try {
+      final payload = {
+        'format': 'deewan-e-sukhan-backup',
+        'version': 1,
+        'createdAt': DateTime.now().toIso8601String(),
+        'poems': _poems.map((p) => p.toJson()).toList(),
+      };
+      final stamp = DateTime.now().millisecondsSinceEpoch;
+      temporaryFile = File('${Directory.systemTemp.path}/deewan_backup_$stamp.json');
+      await temporaryFile.writeAsString(jsonEncode(payload), flush: true);
+      if (!mounted) return;
+      await Share.shareXFiles(
+        [XFile(temporaryFile.path, mimeType: 'application/json')],
+        text: 'دیوانِ سخن — غزلوں کا بیک اَپ',
+      );
+      if (mounted) {
+        _message('شیئر مینو سے فائل کو محفوظ کریں؛ پھر فائل موجود ہونے کی تصدیق کریں۔');
+      }
+    } catch (_) {
+      _message('بیک اَپ بنانے میں مسئلہ آیا۔ دوبارہ کوشش کریں۔');
+    } finally {
+      if (mounted) setState(() => _backupBusy = false);
+    }
+  }
+
+  Future<void> _importBackup() async {
+    if (_backupBusy) return;
+    setState(() => _backupBusy = true);
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+      final picked = result.files.single;
+      Uint8List? bytes = picked.bytes;
+      if (bytes == null && picked.path != null) {
+        bytes = await File(picked.path!).readAsBytes();
+      }
+      if (bytes == null) throw const FormatException('Cannot read file');
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is! Map || decoded['format'] != 'deewan-e-sukhan-backup' ||
+          decoded['version'] != 1 || decoded['poems'] is! List) {
+        throw const FormatException('Not a Deewan backup');
+      }
+      final rawPoems = decoded['poems'] as List;
+      final imported = <Poem>[];
+      final ids = <String>{};
+      for (final item in rawPoems) {
+        if (item is! Map) throw const FormatException('Invalid poem');
+        final json = Map<String, dynamic>.from(item);
+        for (final field in ['id', 'title', 'verses', 'meter', 'qafia', 'radeef']) {
+          if (json[field] is! String) throw const FormatException('Invalid field');
+        }
+        final poem = Poem.fromJson(json);
+        if (poem.id.isEmpty || poem.title.trim().isEmpty ||
+            poem.verses.trim().isEmpty || !ids.add(poem.id)) {
+          throw const FormatException('Invalid poem data');
+        }
+        imported.add(poem);
+      }
+      if (!mounted) return;
+      final existingIds = _poems.map((p) => p.id).toSet();
+      final additions = imported.where((p) => !existingIds.contains(p.id)).toList();
+      final duplicates = imported.length - additions.length;
+      final approved = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('بیک اَپ بحال کریں؟'),
+          content: Text('فائل میں ${imported.length} غزلیں ہیں۔\n'
+              '${additions.length} نئی غزلیں شامل ہوں گی۔\n'
+              '$duplicates پہلے سے موجود ہیں، انہیں تبدیل نہیں کیا جائے گا۔\n'
+              'آپ کی موجودہ غزلیں حذف نہیں ہوں گی۔'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('منسوخ'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('بحال کریں'),
+            ),
+          ],
+        ),
+      );
+      if (approved != true || !mounted) return;
+      if (additions.isEmpty) {
+        _message('تمام غزلیں پہلے سے موجود ہیں؛ کوئی تبدیلی نہیں ہوئی۔');
+        return;
+      }
+      final updated = [..._poems, ...additions];
+      if (await _persist(updated)) {
+        if (!mounted) return;
+        setState(() {
+          _poems..clear()..addAll(updated);
+          _tab = 1;
+        });
+        _message('${additions.length} غزلیں کامیابی سے بحال ہو گئیں۔');
+      } else {
+        _message('بحالی محفوظ نہیں ہو سکی؛ پرانی غزلیں برقرار ہیں۔');
+      }
+    } catch (_) {
+      _message('یہ فائل درست دیوانِ سخن بیک اَپ نہیں یا پڑھی نہیں جا سکی۔');
+    } finally {
+      if (mounted) setState(() => _backupBusy = false);
     }
   }
 
@@ -285,6 +403,25 @@ class _DeewanHomeState extends State<DeewanHome> {
     }).toList();
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                onPressed: _backupBusy ? null : _exportBackup,
+                icon: const Icon(Icons.file_upload_outlined),
+                label: const Text('بیک اَپ بنائیں'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _backupBusy ? null : _importBackup,
+                icon: const Icon(Icons.file_download_outlined),
+                label: const Text('بیک اَپ بحال کریں'),
+              ),
+            ],
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(14),
           child: TextField(
