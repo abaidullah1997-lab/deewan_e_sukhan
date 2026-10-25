@@ -29,7 +29,18 @@ jobs:
 
       - name: Generate platform files
         run: flutter create . --platforms=android,web --project-name deewan_e_sukhan
-
+      - name: Set Android app name
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          import re
+          s, count = re.subn(r'android:label="[^"]*"', 'android:label="دیوانِ عبید"', s, count=1)
+          if count != 1:
+              raise SystemExit("Android app label not found")
+          p.write_text(s)
+          PY
       - name: Get dependencies
         run: flutter pub get
 
