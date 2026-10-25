@@ -483,6 +483,20 @@ class _DeewanHomeState extends State<DeewanHome> {
                                   icon: const Icon(Icons.delete_outline),
                                   label: const Text('حذف'),
                                 ),
+                                
+TextButton.icon(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GhazalPosterPage(poem: poem),
+      ),
+    );
+  },
+  icon: const Icon(Icons.image),
+  label: const Text('پوسٹر بنائیں'),
+),
+  
                               ],
                             ),
                           ],
