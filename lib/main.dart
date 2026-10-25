@@ -320,7 +320,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('دیوانِ سخن')),
+      appBar: AppBar(title: const Text('دیوانِ عبید')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _loadError != null
