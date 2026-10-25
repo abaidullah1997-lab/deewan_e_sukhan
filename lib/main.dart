@@ -349,10 +349,10 @@ class _DeewanHomeState extends State<DeewanHome> {
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 22),
-        const Icon(Icons.auto_stories, size: 68, color: Color(0xFFE6C27A)),
+        Image.asset('assets/ubaid.jpg', height: 110, width: 110, fit: BoxFit.cover),
         const SizedBox(height: 18),
         const Text(
-          'دیوانِ سخن میں خوش آمدید',
+          'دیوانِ عبید میں خوش آمدید',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
