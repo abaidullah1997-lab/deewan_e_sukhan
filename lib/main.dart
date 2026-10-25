@@ -360,7 +360,7 @@ class _DeewanHomeState extends State<DeewanHome> {
 
 class PoemEditor extends StatefulWidget {
   final Poem? poem;
-  final Future<void> Function(Poem) onSave;
+  final Future<bool> Function(Poem) onSave;
 
   const PoemEditor({super.key, this.poem, required this.onSave});
 
