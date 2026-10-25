@@ -16,8 +16,10 @@ dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/ubaid.jpg
 
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "AISelect_20261020_171534_Gallery.jpg"
+  image_path: "assets/ubaid.jpg"
