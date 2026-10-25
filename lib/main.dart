@@ -126,7 +126,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   }
 
   void _message(String message) {
-    if (!mounted) return;
+    if (!mounted) return false;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
