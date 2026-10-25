@@ -5,7 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
 void main() => runApp(const DeewanApp());
 
 class Poem {
@@ -605,5 +607,119 @@ class _PoemEditorState extends State<PoemEditor> {
         ],
       ),
     );
+  }
+}
+
+class GhazalPosterPage extends StatefulWidget {
+  final Poem poem;
+
+  const GhazalPosterPage({
+    super.key,
+    required this.poem,
+  });
+
+  @override
+  State<GhazalPosterPage> createState() => _GhazalPosterPageState();
+}
+
+class _GhazalPosterPageState extends State<GhazalPosterPage> {
+  final GlobalKey _posterKey = GlobalKey();
+  Future<void> _sharePoster() async {
+  try {
+    final boundary = _posterKey.currentContext?.findRenderObject()
+        as RenderRepaintBoundary?;
+    if (boundary == null) return;
+
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) return;
+
+    final bytes = byteData.buffer.asUint8List();
+    final file = File(
+      '${Directory.systemTemp.path}/ghazal_poster.png',
+    );
+    await file.writeAsBytes(bytes);
+
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: 'غزل کا پوسٹر — راجہ عبیداللہ عبید',
+    );
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('پوسٹر شیئر نہیں ہو سکا: $e')),
+    );
+  }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('غزل کا پوسٹر'),
+        actions: [
+  IconButton(
+    icon: const Icon(Icons.share),
+    tooltip: 'پوسٹر شیئر کریں',
+    onPressed: _sharePoster,
+  ),
+],
+      ),
+      body: Container(
+  width: double.infinity,
+  decoration: const BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFF17243A),
+        Color(0xFF101827),
+        Color(0xFF453014),
+      ],
+    ),
+  ),
+  child: RepaintBoundary(
+  key: _posterKey,
+  child: SafeArea(
+  child: SingleChildScrollView(
+    padding: const EdgeInsets.all(24),
+    child: Column(
+      children: [
+        Text(
+          widget.poem.title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFFECC574),
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 30),
+        Text(
+          widget.poem.verses,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 23,
+            height: 2,
+          ),
+        ),
+        const SizedBox(height: 35),
+        const Text(
+          'شاعر: راجہ عبیداللہ عبید',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFFECC574),
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+),
+),
+);
   }
 }
