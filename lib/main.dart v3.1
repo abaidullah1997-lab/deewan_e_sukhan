@@ -139,7 +139,7 @@ class _DeewanHomeState extends State<DeewanHome> {
       updated.insert(0, poem);
     }
     if (await _persist(updated)) {
-      if (!mounted) return false;
+      if (!mounted) return;
       setState(() {
         _poems..clear()..addAll(updated);
         _tab = 1;
@@ -360,7 +360,7 @@ class _DeewanHomeState extends State<DeewanHome> {
 
 class PoemEditor extends StatefulWidget {
   final Poem? poem;
-  final Future<bool> Function(Poem) onSave;
+  final Future<void> Function(Poem) onSave;
 
   const PoemEditor({super.key, this.poem, required this.onSave});
 
