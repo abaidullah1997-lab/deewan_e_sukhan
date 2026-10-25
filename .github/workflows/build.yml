@@ -33,6 +33,17 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Set Android compileSdk 36
+        run: |
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
+          elif [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdk flutter.compileSdkVersion/compileSdk 36/' android/app/build.gradle
+          else
+            echo "Android Gradle file not found"
+            exit 1
+          fi
+
       - name: Build Android APK
         run: flutter build apk --debug
 
