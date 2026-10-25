@@ -52,7 +52,7 @@ class DeewanApp extends StatelessWidget {
     const gold = Color(0xFFE6C27A);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'دیوانِ سخن',
+      title: 'دیوانِ عبید',
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -203,7 +203,7 @@ class _DeewanHomeState extends State<DeewanHome> {
       if (!mounted) return;
       await Share.shareXFiles(
         [XFile(temporaryFile.path, mimeType: 'application/json')],
-        text: 'دیوانِ سخن — غزلوں کا بیک اَپ',
+        text: 'دیوانِ عبید — غزلوں کا بیک اَپ',
       );
       if (mounted) {
         _message('شیئر مینو سے فائل کو محفوظ کریں؛ پھر فائل موجود ہونے کی تصدیق کریں۔');
