@@ -43,7 +43,14 @@ jobs:
             echo "Android Gradle file not found"
             exit 1
           fi
-
+      - name: Fix file_picker compileSdk
+        run: |
+          FILE_PICKER_DIR=$(find "$HOME/.pub-cache" -type d -name "file_picker-*" | head -n 1)
+          if [ -z "$FILE_PICKER_DIR" ]; then
+            echo "file_picker package not found"
+            exit 1
+          fi
+          sed -i -E 's/compileSdk(Version)?[[:space:]]*=?[[:space:]]*[0-9]+/compileSdk 36/' "$FILE_PICKER_DIR/android/build.gradle"
       - name: Build Android APK
         run: flutter build apk --debug
 
