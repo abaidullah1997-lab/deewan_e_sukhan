@@ -43,7 +43,8 @@ jobs:
           PY
       - name: Get dependencies
         run: flutter pub get
-
+      - name: Generate app icon
+        run: dart run flutter_launcher_icons
       - name: Set Android compileSdk 36
         run: |
           if [ -f android/app/build.gradle.kts ]; then
