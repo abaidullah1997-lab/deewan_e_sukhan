@@ -10,6 +10,15 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 void main() => runApp(const DeewanApp());
 
+const List<String> posterDesigns = [
+  'شاہی سنہری',
+  'رومانوی گلابی',
+  'زمردی سبز',
+  'کلاسیکی کاغذی',
+  'رات کا آسمان',
+  'غروبِ آفتاب',
+];
+  
 class Poem {
   final String id;
   final String title;
@@ -637,6 +646,44 @@ class GhazalPosterPage extends StatefulWidget {
 }
 
 class _GhazalPosterPageState extends State<GhazalPosterPage> {
+  
+int _selectedDesign = 0;
+  
+List<Color> get _backgroundColors {
+  switch (_selectedDesign) {
+    case 1:
+      return [
+        const Color(0xFF4A1838),
+        const Color(0xFF9C5277),
+      ];
+    case 2:
+      return [
+        const Color(0xFF102F2B),
+        const Color(0xFF39765D),
+      ];
+    case 3:
+      return [
+        const Color(0xFFF7E8CB),
+        const Color(0xFFC5A67C),
+      ];
+    case 4:
+      return [
+        const Color(0xFF080E27),
+        const Color(0xFF243C73),
+      ];
+    case 5:
+      return [
+        const Color(0xFF612C42),
+        const Color(0xFFDF8B45),
+      ];
+    default:
+      return [
+        const Color(0xFF17243A),
+        const Color(0xFF453014),
+      ];
+  }
+}
+  
   final GlobalKey _posterKey = GlobalKey();
   Future<void> _sharePoster() async {
   try {
@@ -679,19 +726,40 @@ class _GhazalPosterPageState extends State<GhazalPosterPage> {
   ),
 ],
       ),
+      
+bottomNavigationBar: Padding(
+  padding: const EdgeInsets.all(12),
+  child: DropdownButtonFormField<int>(
+    initialValue: _selectedDesign,
+    decoration: const InputDecoration(
+      labelText: 'پوسٹر کا ڈیزائن منتخب کریں',
+    ),
+    items: List.generate(
+      posterDesigns.length,
+      (index) => DropdownMenuItem<int>(
+        value: index,
+        child: Text(posterDesigns[index]),
+      ),
+    ),
+    onChanged: (value) {
+      if (value != null) {
+        setState(() => _selectedDesign = value);
+      }
+    },
+  ),
+),
+      
       body: Container(
   width: double.infinity,
-  decoration: const BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Color(0xFF17243A),
-        Color(0xFF101827),
-        Color(0xFF453014),
-      ],
-    ),
+  
+decoration: BoxDecoration(
+  gradient: LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: _backgroundColors,
   ),
+),
+  
   child: RepaintBoundary(
   key: _posterKey,
   child: SafeArea(
