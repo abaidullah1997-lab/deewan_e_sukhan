@@ -764,7 +764,9 @@ decoration: BoxDecoration(
   key: _posterKey,
   child: SafeArea(
   child: SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
+    
+padding: const EdgeInsets.fromLTRB(24, 70, 24, 24),
+    
     child: Column(
       children: [
         Text(
