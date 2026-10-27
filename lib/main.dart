@@ -737,7 +737,10 @@ TextButton.icon(
                   ? const Color(0xFF302116)
                   : Colors.white;
 
-          return AlertDialog(
+          
+return AlertDialog(
+  scrollable: true,
+  
             backgroundColor: const Color(0xFF101827),
             content: SizedBox(
               width: double.maxFinite,
@@ -748,7 +751,7 @@ TextButton.icon(
                     constraints: BoxConstraints(
                       maxHeight:
                           MediaQuery.of(context).size.height *
-                          0.55,
+                          0.40,
                     ),
                     child: SingleChildScrollView(
                       child: Container(
