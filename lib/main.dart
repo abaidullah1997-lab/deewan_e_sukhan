@@ -96,7 +96,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   String? _loadError;
   int _tab = 0;
   bool _backupBusy = false;
-
+double _poemFontSize = 20.0;
   @override
   void initState() {
     super.initState();
@@ -423,6 +423,43 @@ class _DeewanHomeState extends State<DeewanHome> {
             ],
           ),
         ),
+        
+Padding(
+  padding: const EdgeInsets.symmetric(
+    horizontal: 14,
+    vertical: 8,
+  ),
+  child: Wrap(
+    alignment: WrapAlignment.center,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    spacing: 12,
+    runSpacing: 8,
+    children: [
+      OutlinedButton(
+        onPressed: _poemFontSize > 14
+            ? () {
+                setState(() {
+                  _poemFontSize -= 2;
+                });
+              }
+            : null,
+        child: const Text('A−'),
+      ),
+      Text('سائز: ${_poemFontSize.toInt()}'),
+      FilledButton(
+        onPressed: _poemFontSize < 36
+            ? () {
+                setState(() {
+                  _poemFontSize += 2;
+                });
+              }
+            : null,
+        child: const Text('A+'),
+      ),
+    ],
+  ),
+),
+        
         Padding(
           padding: const EdgeInsets.all(14),
           child: TextField(
@@ -459,11 +496,14 @@ class _DeewanHomeState extends State<DeewanHome> {
                             Text(poem.title,
                                 style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 8),
-                            Text(
-                              poem.verses,
-                              maxLines: 4,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            
+Text(
+  poem.verses,
+  style: TextStyle(fontSize: _poemFontSize),
+  maxLines: 4,
+  overflow: TextOverflow.ellipsis,
+),
+
                             if (poem.meter.isNotEmpty) ...[
                               const SizedBox(height: 8),
                               Text('بحر: ${poem.meter}',
