@@ -153,6 +153,18 @@ Future<Uint8List> _makePosterPng(
                 color: textColor,
               ),
             ),
+            
+const SizedBox(height: 28),
+Text(
+  'شاعر: راجہ عبیداللہ عبید',
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontFamily: 'JameelNooriNastaleeq',
+    fontSize: 18,
+    color: textColor,
+  ),
+),
+            
           ],
         ),
       ),
@@ -791,6 +803,18 @@ return AlertDialog(
                                 color: textColor,
                               ),
                             ),
+                            
+const SizedBox(height: 28),
+Text(
+  'شاعر: راجہ عبیداللہ عبید',
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontFamily: 'JameelNooriNastaleeq',
+    fontSize: 18,
+    color: textColor,
+  ),
+),
+                            
                           ],
                         ),
                       ),
