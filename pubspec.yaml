@@ -12,6 +12,9 @@ dependencies:
   shared_preferences: ^2.3.2
   file_picker: ^8.1.7
   share_plus: ^10.1.4
+  screenshot: ^3.0.0
+  image: ^4.12.0
+  gal: ^2.3.3
   flutter_launcher_icons: ^0.14.4
 
 flutter:
