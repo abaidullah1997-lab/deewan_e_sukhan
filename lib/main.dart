@@ -54,6 +54,7 @@ class DeewanApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'دیوانِ عبید',
       theme: ThemeData(
+fontFamily: 'JameelNooriNastaleeq',
         useMaterial3: true,
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF101827),
