@@ -512,6 +512,45 @@ Text(
                             Wrap(
                               spacing: 8,
                               children: [
+                                
+TextButton.icon(
+  onPressed: () {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF201A12),
+        title: Text(
+          poem.title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFFE6C27A),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            poem.verses,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'JameelNooriNastaleeq',
+              fontSize: _poemFontSize,
+              height: 2,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('بند کریں'),
+          ),
+        ],
+      ),
+    );
+  },
+  icon: const Icon(Icons.image_outlined),
+  label: const Text('پوسٹر'),
+),
+                                
                                 TextButton.icon(
                                   onPressed: () => _openEditor(poem),
                                   icon: const Icon(Icons.edit),
