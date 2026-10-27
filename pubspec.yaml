@@ -19,6 +19,11 @@ flutter:
   assets:
     - assets/ubaid.jpg
 
+  fonts:
+    - family: JameelNooriNastaleeq
+      fonts:
+        - asset: "assets/fonts/jameel-noori-nastaleeq-regular_ufonts.com (2).ttf"
+  
 flutter_launcher_icons:
   android: true
   ios: false
