@@ -6,6 +6,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:screenshot/screenshot.dart';
+import 'package:image/image.dart' as img;
+import 'package:gal/gal.dart';
+
 void main() => runApp(const DeewanApp());
 
 class Poem {
@@ -97,6 +101,162 @@ class _DeewanHomeState extends State<DeewanHome> {
   int _tab = 0;
   bool _backupBusy = false;
 double _poemFontSize = 20.0;
+  
+final ScreenshotController _posterScreenshotController = ScreenshotController();
+  
+Future<Uint8List> _makePosterPng(
+  Poem poem,
+  List<Color> colors, {
+  required bool darkText,
+}) async {
+  final textColor = darkText
+      ? const Color(0xFF302116)
+      : Colors.white;
+
+  final poster = Directionality(
+    textDirection: TextDirection.rtl,
+    child: Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 500,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 30,
+          vertical: 45,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: colors,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              poem.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'JameelNooriNastaleeq',
+                fontSize: 28,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              poem.verses,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'JameelNooriNastaleeq',
+                fontSize: _poemFontSize,
+                height: 2,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  return _posterScreenshotController.captureFromLongWidget(
+    InheritedTheme.captureAll(context, poster),
+    context: context,
+    pixelRatio: 2.0,
+    delay: const Duration(milliseconds: 500),
+    constraints: const BoxConstraints(
+      maxWidth: 520,
+    ),
+  );
+}
+  
+Future<void> _savePosterImage(
+  Poem poem,
+  List<Color> colors, {
+  required bool darkText,
+  required bool asJpg,
+}) async {
+  try {
+    final pngBytes = await _makePosterPng(
+      poem,
+      colors,
+      darkText: darkText,
+    );
+
+    Uint8List outputBytes = pngBytes;
+
+    if (asJpg) {
+      final image = img.decodeImage(pngBytes);
+
+      if (image == null) {
+        throw const FormatException(
+          'تصویر تیار نہیں ہو سکی',
+        );
+      }
+
+      outputBytes = Uint8List.fromList(
+        img.encodeJpg(image, quality: 90),
+      );
+    }
+
+    final extension = asJpg ? 'jpg' : 'png';
+
+    final fileName =
+        'deewan_poster_${DateTime.now().millisecondsSinceEpoch}.$extension';
+
+    await Gal.putImageBytes(
+      outputBytes,
+      name: fileName,
+    );
+
+    if (!mounted) return;
+
+    _message(
+      'پوسٹر $extension فارمیٹ میں گیلری میں محفوظ ہو گیا',
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    _message('پوسٹر محفوظ نہیں ہو سکا: $e');
+  }
+}
+  
+Future<void> _sharePosterImage(
+  Poem poem,
+  List<Color> colors, {
+  required bool darkText,
+}) async {
+  try {
+    final pngBytes = await _makePosterPng(
+      poem,
+      colors,
+      darkText: darkText,
+    );
+
+    final fileName =
+        'deewan_poster_${DateTime.now().millisecondsSinceEpoch}.png';
+
+    final file = File(
+      '${Directory.systemTemp.path}/$fileName',
+    );
+
+    await file.writeAsBytes(
+      pngBytes,
+      flush: true,
+    );
+
+    await Share.shareXFiles(
+      [XFile(file.path)],
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    _message(
+      'پوسٹر شیئر نہیں ہو سکا: $e',
+    );
+  }
+}
+  
   @override
   void initState() {
     super.initState();
@@ -641,6 +801,7 @@ TextButton.icon(
                     ),
                   ),
                   DropdownButton<String>(
+                    
                     value: selectedDesign,
                     isExpanded: true,
                     dropdownColor:
@@ -662,6 +823,54 @@ TextButton.icon(
                       }
                     },
                   ),
+                  
+const SizedBox(height: 12),
+Wrap(
+  alignment: WrapAlignment.center,
+  spacing: 8,
+  runSpacing: 8,
+  children: [
+    OutlinedButton.icon(
+      onPressed: () async {
+        await _savePosterImage(
+          poem,
+          posterThemes[selectedDesign]!,
+          darkText:
+              selectedDesign == 'کلاسیکی کاغذی',
+          asJpg: false,
+        );
+      },
+      icon: const Icon(Icons.download),
+      label: const Text('PNG'),
+    ),
+    OutlinedButton.icon(
+      onPressed: () async {
+        await _savePosterImage(
+          poem,
+          posterThemes[selectedDesign]!,
+          darkText:
+              selectedDesign == 'کلاسیکی کاغذی',
+          asJpg: true,
+        );
+      },
+      icon: const Icon(Icons.download),
+      label: const Text('JPG'),
+    ),
+    FilledButton.icon(
+      onPressed: () async {
+        await _sharePosterImage(
+          poem,
+          posterThemes[selectedDesign]!,
+          darkText:
+              selectedDesign == 'کلاسیکی کاغذی',
+        );
+      },
+      icon: const Icon(Icons.share),
+      label: const Text('شیئر'),
+    ),
+  ],
+),
+                  
                 ],
               ),
             ),
