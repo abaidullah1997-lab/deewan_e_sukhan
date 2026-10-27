@@ -515,41 +515,173 @@ Text(
                                 
 TextButton.icon(
   onPressed: () {
+    const posterThemes = <String, List<Color>>{
+      'شاہی سنہری': [
+        Color(0xFF17243A),
+        Color(0xFF453014),
+      ],
+      'رومانوی گلابی': [
+        Color(0xFF4A1838),
+        Color(0xFF9C5277),
+      ],
+      'زمردی سبز': [
+        Color(0xFF102F2B),
+        Color(0xFF39765D),
+      ],
+      'کلاسیکی کاغذی': [
+        Color(0xFFF7E8CB),
+        Color(0xFFC5A67C),
+      ],
+      'رات کا آسمان': [
+        Color(0xFF080E27),
+        Color(0xFF243C73),
+      ],
+      'غروبِ آفتاب': [
+        Color(0xFF612C42),
+        Color(0xFFDF8B45),
+      ],
+'نیلمی رات': [
+  Color(0xFF071C38),
+  Color(0xFF244A70),
+],
+'جامنی خواب': [
+  Color(0xFF241438),
+  Color(0xFF684A86),
+],
+'سبز جنگل': [
+  Color(0xFF0F281D),
+  Color(0xFF315542),
+],
+'سرخ مخمل': [
+  Color(0xFF2D0D16),
+  Color(0xFF7C283B),
+],
+'سیاہ و سنہری': [
+  Color(0xFF0B0B0D),
+  Color(0xFF66501F),
+],
+'نیلا سمندر': [
+  Color(0xFF063A47),
+  Color(0xFF166A79),
+],
+};
+    
+    String selectedDesign = 'شاہی سنہری';
+
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF201A12),
-        title: Text(
-          poem.title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Color(0xFFE6C27A),
-          ),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            poem.verses,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'JameelNooriNastaleeq',
-              fontSize: _poemFontSize,
-              height: 2,
-              color: Colors.white,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setPosterState) {
+          final textColor =
+              selectedDesign == 'کلاسیکی کاغذی'
+                  ? const Color(0xFF302116)
+                  : Colors.white;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF101827),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight:
+                          MediaQuery.of(context).size.height *
+                          0.55,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                            colors: posterThemes[
+                                selectedDesign]!,
+                          ),
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              poem.title,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily:
+                                    'JameelNooriNastaleeq',
+                                fontSize: 26,
+                                color: textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              poem.verses,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily:
+                                    'JameelNooriNastaleeq',
+                                fontSize: _poemFontSize,
+                                height: 2,
+                                color: textColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'پوسٹر کا ڈیزائن منتخب کریں',
+                    style: TextStyle(
+                      color: Color(0xFFE6C27A),
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: selectedDesign,
+                    isExpanded: true,
+                    dropdownColor:
+                        const Color(0xFF17243A),
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                    items: posterThemes.keys.map((name) {
+                      return DropdownMenuItem<String>(
+                        value: name,
+                        child: Text(name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setPosterState(() {
+                          selectedDesign = value;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('بند کریں'),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(dialogContext),
+                child: const Text('بند کریں'),
+              ),
+            ],
+          );
+        },
       ),
     );
   },
   icon: const Icon(Icons.image_outlined),
   label: const Text('پوسٹر'),
 ),
+  
+
                                 
                                 TextButton.icon(
                                   onPressed: () => _openEditor(poem),
