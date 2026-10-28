@@ -103,82 +103,34 @@ class _DeewanHomeState extends State<DeewanHome> {
 double _poemFontSize = 20.0;
   
 final ScreenshotController _posterScreenshotController = ScreenshotController();
+
 Widget _alignedVerse(
   String line,
   Color textColor,
 ) {
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      
-final verseStyle = TextStyle(
-  fontFamily: 'JameelNooriNastaleeq',
-  fontSize: _poemFontSize,
-  height: 2,
-  color: textColor,
-);
+  final verseStyle = TextStyle(
+    fontFamily: 'JameelNooriNastaleeq',
+    fontSize: _poemFontSize,
+    height: 2,
+    color: textColor,
+  );
 
-final textPainter = TextPainter(
-  text: TextSpan(
-    text: line,
-    style: verseStyle,
-  ),
-  textDirection: TextDirection.rtl,
-  maxLines: 1,
-)..layout();
-
-final double verseWidth = textPainter.width;
-
-final words = line.trim().split(RegExp(r'\s+'));
-
-final availableWidth = constraints.maxWidth;
-
-final extraSpace = availableWidth - verseWidth;
-
-final gapCount = words.length - 1;
-      
-final double spacePerGap =
-    gapCount > 0 && extraSpace > 0
-        ? extraSpace / gapCount
-        : 0;
-
-final bool canJustify =
-    gapCount > 0 &&
-    verseWidth <= availableWidth &&
-    spacePerGap <= 25;
-      
-      
-return SizedBox(
-  width: availableWidth,
-  child: canJustify
-      
-? FittedBox(
-    fit: BoxFit.scaleDown,
-    child: Row(
-      
-          textDirection: TextDirection.rtl,
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
-          children: words.map((word) {
-            return Text(
-              word,
-              textDirection: TextDirection.rtl,
-              style: verseStyle,
-            );
-          }).toList(),
-        )
-)
-      : Text(
-          line,
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-          softWrap: false,
-          style: verseStyle,
-        ),
-);
-
-    },
+  return SizedBox(
+    width: double.infinity,
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerRight,
+      child: Text(
+        line,
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.right,
+        softWrap: false,
+        style: verseStyle,
+      ),
+    ),
   );
 }
+
   
 Future<List<Uint8List>> _makePosterPng(
   
@@ -309,10 +261,13 @@ final imageBytes = await _posterScreenshotController.captureFromLongWidget(
     context: context,
     pixelRatio: 2.0,
     delay: const Duration(milliseconds: 500), 
+
 constraints: BoxConstraints(
-      
-maxWidth: posterWidth,     
-    ),
+  minWidth: posterWidth,
+  maxWidth: posterWidth,
+  minHeight: posterHeight,
+  maxHeight: posterHeight,
+),
 );
   
 posterImages.add(imageBytes);
