@@ -103,22 +103,148 @@ class _DeewanHomeState extends State<DeewanHome> {
 double _poemFontSize = 20.0;
   
 final ScreenshotController _posterScreenshotController = ScreenshotController();
+Widget _alignedVerse(
+  String line,
+  Color textColor,
+) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      
+final verseStyle = TextStyle(
+  fontFamily: 'JameelNooriNastaleeq',
+  fontSize: _poemFontSize,
+  height: 2,
+  color: textColor,
+);
+
+final textPainter = TextPainter(
+  text: TextSpan(
+    text: line,
+    style: verseStyle,
+  ),
+  textDirection: TextDirection.rtl,
+  maxLines: 1,
+)..layout();
+
+final double verseWidth = textPainter.width;
+
+final words = line.trim().split(RegExp(r'\s+'));
+
+final availableWidth = constraints.maxWidth;
+
+final extraSpace = availableWidth - verseWidth;
+
+final gapCount = words.length - 1;
+      
+final double spacePerGap =
+    gapCount > 0 && extraSpace > 0
+        ? extraSpace / gapCount
+        : 0;
+
+final bool canJustify =
+    gapCount > 0 &&
+    verseWidth <= availableWidth &&
+    spacePerGap <= 25;
+      
+      
+return SizedBox(
+  width: availableWidth,
+  child: canJustify
+      
+? FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Row(
+      
+          textDirection: TextDirection.rtl,
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
+          children: words.map((word) {
+            return Text(
+              word,
+              textDirection: TextDirection.rtl,
+              style: verseStyle,
+            );
+          }).toList(),
+        )
+)
+      : Text(
+          line,
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
+          softWrap: false,
+          style: verseStyle,
+        ),
+);
+
+    },
+  );
+}
   
-Future<Uint8List> _makePosterPng(
+Future<List<Uint8List>> _makePosterPng(
+  
   Poem poem,
   List<Color> colors, {
   required bool darkText,
+    required String selectedFormat,
 }) async {
+ 
+final List<String> verseLines = poem.verses
+    .split('\n')
+    .where((line) => line.trim().isNotEmpty)
+    .toList();
+  
+final List<List<String>> couplets = [];
+
+for (int i = 0; i < verseLines.length; i += 2) {
+  couplets.add(
+    verseLines.skip(i).take(2).toList(),
+  );
+}
+  
+final double posterWidth = 540;
+
+final double posterHeight = switch (selectedFormat) {
+  '9:16' => 960,
+  '4:5' => 675,
+  '1:1' => 540,
+  _ => 960,
+};
+  
+final int coupletsPerPage = switch (selectedFormat) {
+  '9:16' => 5,
+  '4:5' => 3,
+  '1:1' => 2,
+  _ => 5,
+};
+
+final List<List<String>> posterPages = [];
+final List<Uint8List> posterImages = [];
+  
+for (int i = 0; i < couplets.length; i += coupletsPerPage) {
+  final pageCouplets = couplets
+      .skip(i)
+      .take(coupletsPerPage)
+      .toList();
+
+  posterPages.add(
+    pageCouplets.expand((couplet) => couplet).toList(),
+  );
+}
+  
   final textColor = darkText
       ? const Color(0xFF302116)
       : Colors.white;
 
+for (final pageLines in posterPages) {
   final poster = Directionality(
     textDirection: TextDirection.rtl,
     child: Material(
       color: Colors.transparent,
       child: Container(
-        width: 500,
+        
+width: posterWidth,    
+height: posterHeight,
+
         padding: const EdgeInsets.symmetric(
           horizontal: 30,
           vertical: 45,
@@ -129,8 +255,10 @@ Future<Uint8List> _makePosterPng(
             end: Alignment.bottomLeft,
             colors: colors,
           ),
-        ),
-        child: Column(
+        ),       
+child: FittedBox(
+  fit: BoxFit.scaleDown,
+  child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
@@ -143,16 +271,19 @@ Future<Uint8List> _makePosterPng(
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              poem.verses,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'JameelNooriNastaleeq',
-                fontSize: _poemFontSize,
-                height: 2,
-                color: textColor,
-              ),
-            ),
+  
+SizedBox(
+  width: double.infinity,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      
+...pageLines.map((line) {
+  return _alignedVerse(line, textColor);
+}),
+    ],
+  ),
+),
             
 const SizedBox(height: 28),
 Text(
@@ -168,18 +299,27 @@ Text(
           ],
         ),
       ),
-    ),
+    ),     
+),    
   );
 
-  return _posterScreenshotController.captureFromLongWidget(
+  
+final imageBytes = await _posterScreenshotController.captureFromLongWidget(
     InheritedTheme.captureAll(context, poster),
     context: context,
     pixelRatio: 2.0,
-    delay: const Duration(milliseconds: 500),
-    constraints: const BoxConstraints(
-      maxWidth: 520,
+    delay: const Duration(milliseconds: 500), 
+constraints: BoxConstraints(
+      
+maxWidth: posterWidth,
+      
     ),
-  );
+  )
+);
+  
+posterImages.add(imageBytes);
+}
+return posterImages;
 }
   
 Future<void> _savePosterImage(
@@ -187,45 +327,55 @@ Future<void> _savePosterImage(
   List<Color> colors, {
   required bool darkText,
   required bool asJpg,
+    
+required String selectedFormat,
+    
 }) async {
-  try {
-    final pngBytes = await _makePosterPng(
+  try { 
+final posterImages = await _makePosterPng(
       poem,
       colors,
       darkText: darkText,
+      
+selectedFormat: selectedFormat,
+      
     );
 
-    Uint8List outputBytes = pngBytes;
+    
+final extension = asJpg ? 'jpg' : 'png';
 
-    if (asJpg) {
-      final image = img.decodeImage(pngBytes);
+for (int i = 0; i < posterImages.length; i++) {
+  final pngBytes = posterImages[i];
+  Uint8List outputBytes = pngBytes;
 
-      if (image == null) {
-        throw const FormatException(
-          'تصویر تیار نہیں ہو سکی',
-        );
-      }
+  if (asJpg) {
+    final image = img.decodeImage(pngBytes);
 
-      outputBytes = Uint8List.fromList(
-        img.encodeJpg(image, quality: 90),
+    if (image == null) {
+      throw const FormatException(
+        'تصویر تیار نہیں ہو سکی',
       );
     }
 
-    final extension = asJpg ? 'jpg' : 'png';
-
-    final fileName =
-        'deewan_poster_${DateTime.now().millisecondsSinceEpoch}.$extension';
-
-    await Gal.putImageBytes(
-      outputBytes,
-      name: fileName,
+    outputBytes = Uint8List.fromList(
+      img.encodeJpg(image, quality: 90),
     );
+  }
+
+  final fileName =
+      'deewan_poster_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.$extension';
+
+  await Gal.putImageBytes(
+    outputBytes,
+    name: fileName,
+  );
+}
 
     if (!mounted) return;
 
-    _message(
-      'پوسٹر $extension فارمیٹ میں گیلری میں محفوظ ہو گیا',
-    );
+_message(
+  '${posterImages.length} پوسٹر گیلری میں $extension فارمیٹ میں محفوظ ہو گئے',
+);
   } catch (e) {
     if (!mounted) return;
 
@@ -237,29 +387,45 @@ Future<void> _sharePosterImage(
   Poem poem,
   List<Color> colors, {
   required bool darkText,
+ 
+required String selectedFormat,
+    
 }) async {
   try {
-    final pngBytes = await _makePosterPng(
+    
+final posterImages = await _makePosterPng(
+  
       poem,
       colors,
       darkText: darkText,
+      
+selectedFormat: selectedFormat,
+      
     );
 
-    final fileName =
-        'deewan_poster_${DateTime.now().millisecondsSinceEpoch}.png';
+    
+final List<XFile> shareFiles = [];
 
-    final file = File(
-      '${Directory.systemTemp.path}/$fileName',
-    );
+for (int i = 0; i < posterImages.length; i++) {
+  final fileName =
+      'deewan_poster_${DateTime.now().millisecondsSinceEpoch}_${i + 1}.png';
 
-    await file.writeAsBytes(
-      pngBytes,
-      flush: true,
-    );
+  final file = File(
+    '${Directory.systemTemp.path}/$fileName',
+  );
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
-    );
+  await file.writeAsBytes(
+    posterImages[i],
+    flush: true,
+  );
+
+  shareFiles.add(XFile(file.path));
+}
+
+if (shareFiles.isNotEmpty) {
+  await Share.shareXFiles(shareFiles);
+}
+
   } catch (e) {
     if (!mounted) return;
 
@@ -740,6 +906,8 @@ TextButton.icon(
     
     String selectedDesign = 'شاہی سنہری';
 
+String selectedFormat = '9:16';
+    
     showDialog<void>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -850,6 +1018,32 @@ Text(
                       }
                     },
                   ),
+
+const SizedBox(height: 12),
+const Text(
+  'پوسٹر کا سائز منتخب کریں',
+  style: TextStyle(
+    color: Color(0xFFE6C27A),
+  ),
+),
+DropdownButton<String>(
+  value: selectedFormat,
+  isExpanded: true,
+  dropdownColor: const Color(0xFF17243A),
+  items: ['9:16', '4:5', '1:1'].map((format) {
+    return DropdownMenuItem<String>(
+      value: format,
+      child: Text(format),
+    );
+  }).toList(),
+  onChanged: (value) {
+    if (value != null) {
+      setPosterState(() {
+        selectedFormat = value;
+      });
+    }
+  },
+),
                   
 const SizedBox(height: 12),
 Wrap(
@@ -865,6 +1059,7 @@ Wrap(
           darkText:
               selectedDesign == 'کلاسیکی کاغذی',
           asJpg: false,
+          selectedFormat: selectedFormat,
         );
       },
       icon: const Icon(Icons.download),
@@ -878,6 +1073,7 @@ Wrap(
           darkText:
               selectedDesign == 'کلاسیکی کاغذی',
           asJpg: true,
+          selectedFormat: selectedFormat,
         );
       },
       icon: const Icon(Icons.download),
@@ -890,6 +1086,7 @@ Wrap(
           posterThemes[selectedDesign]!,
           darkText:
               selectedDesign == 'کلاسیکی کاغذی',
+          selectedFormat: selectedFormat,
         );
       },
       icon: const Icon(Icons.share),
