@@ -311,10 +311,8 @@ final imageBytes = await _posterScreenshotController.captureFromLongWidget(
     delay: const Duration(milliseconds: 500), 
 constraints: BoxConstraints(
       
-maxWidth: posterWidth,
-      
+maxWidth: posterWidth,     
     ),
-  )
 );
   
 posterImages.add(imageBytes);
