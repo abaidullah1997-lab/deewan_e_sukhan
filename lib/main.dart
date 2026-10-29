@@ -208,9 +208,8 @@ height: posterHeight,
             colors: colors,
           ),
         ),       
-child: FittedBox(
-  fit: BoxFit.scaleDown,
-  child: Column(
+
+child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
@@ -251,8 +250,7 @@ Text(
           ],
         ),
       ),
-    ),     
-),    
+    ),       
   );
 
 final imageBytes =
