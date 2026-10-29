@@ -255,21 +255,14 @@ Text(
 ),    
   );
 
-  
-final imageBytes = await _posterScreenshotController.captureFromLongWidget(
-    InheritedTheme.captureAll(context, poster),
-    context: context,
-    pixelRatio: 2.0,
-    delay: const Duration(milliseconds: 500), 
-
-constraints: BoxConstraints(
-  minWidth: posterWidth,
-  maxWidth: posterWidth,
-  minHeight: posterHeight,
-  maxHeight: posterHeight,
-),
+final imageBytes =
+    await _posterScreenshotController.captureFromWidget(
+  InheritedTheme.captureAll(context, poster),
+  context: context,
+  pixelRatio: 2.0,
+  delay: const Duration(milliseconds: 500),
+  targetSize: Size(posterWidth, posterHeight),
 );
-  
 posterImages.add(imageBytes);
 }
 return posterImages;
@@ -293,7 +286,6 @@ final posterImages = await _makePosterPng(
 selectedFormat: selectedFormat,
       
     );
-
     
 final extension = asJpg ? 'jpg' : 'png';
 
