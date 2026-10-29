@@ -119,11 +119,11 @@ Widget _alignedVerse(
     width: double.infinity,
     child: FittedBox(
       fit: BoxFit.scaleDown,
-      alignment: Alignment.centerRight,
+      alignment: Alignment.center,
       child: Text(
         line,
         textDirection: TextDirection.rtl,
-        textAlign: TextAlign.right,
+        textAlign: TextAlign.center,
         softWrap: false,
         style: verseStyle,
       ),
