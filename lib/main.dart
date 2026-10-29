@@ -110,7 +110,8 @@ Widget _alignedVerse(
 ) {
   final verseStyle = TextStyle(
     fontFamily: 'JameelNooriNastaleeq',
-    fontSize: _poemFontSize,
+    
+fontSize: 30,
     height: 2,
     color: textColor,
   );
@@ -160,13 +161,13 @@ final double posterHeight = switch (selectedFormat) {
   '4:5' => 675,
   '1:1' => 540,
   _ => 960,
-};
-  
+}; 
+
 final int coupletsPerPage = switch (selectedFormat) {
-  '9:16' => 5,
+  '9:16' => 4,
   '4:5' => 3,
   '1:1' => 2,
-  _ => 5,
+  _ => 4,
 };
 
 final List<List<String>> posterPages = [];
@@ -210,7 +211,9 @@ height: posterHeight,
         ),       
 
 child: Column(
-          mainAxisSize: MainAxisSize.min,
+          
+mainAxisSize: MainAxisSize.max,
+mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
               poem.title,
