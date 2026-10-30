@@ -959,7 +959,8 @@ Text(
                     onChanged: (value) {
                       if (value != null) {
                         setPosterState(() {
-                          selectedDesign = value;
+                          selectedDesign = value;              
+                          selectedPage = 0; 
                         });
                       }
                     },
@@ -985,7 +986,8 @@ DropdownButton<String>(
   onChanged: (value) {
     if (value != null) {
       setPosterState(() {
-        selectedFormat = value;
+        selectedFormat = value;   
+        selectedPage = 0;
       });
     }
   },
