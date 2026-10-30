@@ -233,7 +233,10 @@ SizedBox(
     children: [
       
 ...pageLines.map((line) {
-  return _alignedVerse(line, textColor);
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: _alignedVerse(line, textColor),
+  );
 }),
     ],
   ),
