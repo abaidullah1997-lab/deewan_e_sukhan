@@ -101,7 +101,7 @@ class _DeewanHomeState extends State<DeewanHome> {
   int _tab = 0;
   bool _backupBusy = false;
 double _poemFontSize = 20.0;
-  
+int selectedPage = 0;
 final ScreenshotController _posterScreenshotController = ScreenshotController();
 
 Widget _alignedVerse(
@@ -863,6 +863,36 @@ String selectedFormat = '9:16';
                   ? const Color(0xFF302116)
                   : Colors.white;
 
+final previewLines = poem.verses
+    .split('\n')
+    .where((line) => line.trim().isNotEmpty)
+    .toList();
+
+final int previewCoupletsPerPage =
+    switch (selectedFormat) {
+  '9:16' => 4,
+  '4:5' => 3,
+  '1:1' => 2,
+  _ => 4,
+};
+
+final int previewLinesPerPage =
+    previewCoupletsPerPage * 2;
+
+final int totalPages = previewLines.isEmpty
+    ? 1
+    : (previewLines.length +
+            previewLinesPerPage - 1) ~/
+        previewLinesPerPage;
+
+if (selectedPage >= totalPages) {
+  selectedPage = totalPages - 1;
+}
+
+final pageLines = previewLines
+    .skip(selectedPage * previewLinesPerPage)
+    .take(previewLinesPerPage)
+    .toList();
           
 return AlertDialog(
   scrollable: true,
@@ -906,8 +936,8 @@ return AlertDialog(
                               ),
                             ),
                             const SizedBox(height: 18),
-                            Text(
-                              poem.verses,
+                            Text(    
+                            pageLines.join('\n'),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontFamily:
@@ -933,10 +963,42 @@ Text(
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'پوسٹر کا ڈیزائن منتخب کریں',
+                  ),           
+const SizedBox(height: 12),
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    TextButton(
+      onPressed: selectedPage > 0
+          ? () {
+              setPosterState(() {
+                selectedPage--;
+              });
+            }
+          : null,
+      child: const Text('پچھلا صفحہ'),
+    ),
+    Text(
+      'صفحہ ${selectedPage + 1} / $totalPages',
+      style: const TextStyle(
+        color: Colors.white,
+      ),
+    ),
+    TextButton(
+      onPressed: selectedPage < totalPages - 1
+          ? () {
+              setPosterState(() {
+                selectedPage++;
+              });
+            }
+          : null,
+      child: const Text('اگلا صفحہ'),
+    ),
+  ],
+),                  
+const SizedBox(height: 14),
+const Text(
+  'پوسٹر کا ڈیزائن منتخب کریں',
                     style: TextStyle(
                       color: Color(0xFFE6C27A),
                     ),
