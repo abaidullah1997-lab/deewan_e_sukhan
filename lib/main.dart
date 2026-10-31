@@ -910,9 +910,10 @@ return AlertDialog(
                     constraints: BoxConstraints(
                       maxHeight:
                           MediaQuery.of(context).size.height *
-                          0.40,
+                          0.50,
                     ),
-                    child: SingleChildScrollView(
+                    child: SingleChildScrollView(         
+physics: const BouncingScrollPhysics(),            
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(18),
