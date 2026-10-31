@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:screenshot/screenshot.dart';
 import 'package:image/image.dart' as img;
-import 'package:gal/gal.dart';
+import 'package:gal/gal.dart'; 
 
 void main() => runApp(const DeewanApp());
 
